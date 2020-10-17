@@ -88,6 +88,11 @@ export class SettingsCtrl {
         id: 'links',
         icon: 'gicon gicon-link',
       });
+      this.sections.push({
+        title: 'Time Ranges',
+        id: 'ranges',
+        icon: 'fa fa-clock-o',
+      });
     }
 
     if (this.dashboard.id && this.dashboard.meta.canSave) {
@@ -126,11 +131,13 @@ export class SettingsCtrl {
     for (const section of this.sections) {
       const sectionParams = _.defaults({ editview: section.id }, params);
       section.url = getConfig().appSubUrl + url + '?' + $.param(sectionParams);
+      console.log('Teste Log \n Dashboard.SettingsCtrl buildSectionList()', sectionParams, section.url);
     }
   }
 
   onRouteUpdated() {
     this.viewId = this.$location.search().editview;
+    console.log('Teste Log \n Dashboard.SettingsCtrl onRouteUpdated()', this.viewId);
 
     if (this.viewId) {
       this.json = angular.toJson(this.dashboard.getSaveModelClone(), true);
@@ -141,6 +148,7 @@ export class SettingsCtrl {
     }
 
     const currentSection: any = _.find(this.sections, { id: this.viewId } as any);
+    console.log('Teste Log \n Dashboard.SettingsCtrl onRouteUpdated()', currentSection);
     if (!currentSection) {
       this.sections.unshift({
         title: 'Not found',

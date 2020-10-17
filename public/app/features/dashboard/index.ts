@@ -15,6 +15,8 @@ import './components/UnsavedChangesModal';
 import './components/AdHocFilters';
 import './components/RowOptions';
 
+import './components/CustomTimeRanges';
+
 import DashboardPermissions from './components/DashboardPermissions/DashboardPermissions';
 
 // angular wrappers

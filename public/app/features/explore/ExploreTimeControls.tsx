@@ -27,13 +27,14 @@ export interface Props {
 
 export class ExploreTimeControls extends Component<Props> {
   onMoveTimePicker = (direction: number) => {
+    console.log('ExploreTimeControls.tsx OnMoveTimePicker Direction:', direction);
     const { range, onChangeTime, timeZone } = this.props;
     const { from, to } = getShiftedTimeRange(direction, range);
     const nextTimeRange = {
       from: dateTimeForTimeZone(timeZone, from),
       to: dateTimeForTimeZone(timeZone, to),
     };
-
+    console.log('ExploreTimeControls.tsx OnMoveTimePicker Direction:', direction);
     onChangeTime(nextTimeRange);
   };
 
@@ -73,6 +74,11 @@ export class ExploreTimeControls extends Component<Props> {
         timeSyncButton={timeSyncButton}
         isSynced={syncedTimes}
         onChange={this.onChangeTimePicker}
+        onCustomChange={this.onChangeTimePicker}
+        onCustomDaySelected={this.onChangeTimePicker}
+        onCustomWeekSelected={this.onChangeTimePicker}
+        onCustomMonthSelected={this.onChangeTimePicker}
+        dashboard={null}
       />
     );
   }
