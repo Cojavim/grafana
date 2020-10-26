@@ -105,10 +105,15 @@ class UnthemedDashNavTimeControls extends Component<Props> {
         <TimePickerWithHistory
           value={timePickerValue}
           onChange={this.onChangeTimePicker}
+          onCustomChange={this.onChangeTimePicker}
+          onCustomDaySelected={this.onChangeTimePicker}
+          onCustomWeekSelected={this.onChangeTimePicker}
+          onCustomMonthSelected={this.onChangeTimePicker}
           timeZone={timeZone}
           onMoveBackward={this.onMoveBack}
           onMoveForward={this.onMoveForward}
           onZoom={this.onZoom}
+          dashboard={dashboard}
         />
         <RefreshPicker
           onIntervalChanged={this.onChangeRefreshInterval}

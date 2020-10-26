@@ -51,6 +51,19 @@ export class DashboardModel {
   gnetId: any;
   panels: PanelModel[];
   panelInEdit?: PanelModel;
+  customTimeRanges: any;
+  ranges: any;
+  day: any;
+  week: any;
+  month: any;
+  showCustomRanges: boolean;
+  hideRelativeRanges: boolean;
+  hideOtherRelativeRanges: boolean;
+  customReload: boolean;
+  customReloadCurrent: boolean;
+  mobileView: boolean;
+  absoluteBefore: boolean;
+  absoluteAfter: boolean;
 
   // ------------------
   // not persisted
@@ -98,6 +111,18 @@ export class DashboardModel {
     this.schemaVersion = data.schemaVersion || 0;
     this.version = data.version || 0;
     this.links = data.links || [];
+    this.ranges = data.ranges || [];
+    this.day = data.day || null;
+    this.week = data.week || null;
+    this.month = data.month || null;
+    this.customReload = data.customReload || false;
+    this.customReloadCurrent = data.customReloadCurrent || false;
+    this.showCustomRanges = data.showCustomRanges || false;
+    this.hideRelativeRanges = data.hideRelativeRanges || false;
+    this.hideOtherRelativeRanges = data.hideOtherRelativeRanges || false;
+    this.mobileView = data.mobileView || false;
+    this.absoluteBefore = this.defaultTrue(data.absoluteBefore);
+    this.absoluteAfter = data.absoluteAfter || false;
     this.gnetId = data.gnetId || null;
     this.panels = _.map(data.panels || [], (panelData: any) => new PanelModel(panelData));
 
@@ -109,6 +134,14 @@ export class DashboardModel {
 
     this.addBuiltInAnnotationQuery();
     this.sortPanelsByGridPos();
+  }
+
+  defaultTrue(aAbsoluteBefore: boolean) {
+    if (aAbsoluteBefore === undefined || aAbsoluteBefore === null) {
+      return true;
+    } else {
+      return aAbsoluteBefore || false;
+    }
   }
 
   addBuiltInAnnotationQuery() {

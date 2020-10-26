@@ -7,6 +7,7 @@ import { TimePickerTitle } from './TimePickerTitle';
 import { TimeRangeForm } from './TimeRangeForm';
 import { CustomScrollbar } from '../../CustomScrollbar/CustomScrollbar';
 import { TimeRangeList } from './TimeRangeList';
+import { CustomTimeRangeList } from './CustomTimeRangeList';
 import { mapRangeToTimeOption } from './mapper';
 import { getThemeColors } from './colors';
 
@@ -124,9 +125,24 @@ const getEmptyListStyles = stylesFactory((theme: GrafanaTheme) => {
 interface Props {
   value: TimeRange;
   onChange: (timeRange: TimeRange) => void;
+  onRelativeChange: (timeRange: TimeRange) => void;
+  onCustomChange: (timeRange: any) => void;
+  onCustomDaySelected: (timeRange: any) => void;
+  onCustomWeekSelected: (timeRange: any) => void;
+  onCustomMonthSelected: (timeRange: any) => void;
+  onCurrentShiftSelected: (timeRange: any) => void;
   timeZone?: TimeZone;
   quickOptions?: TimeOption[];
   otherOptions?: TimeOption[];
+  customOptions?: any[];
+  customDay?: any;
+  customWeek?: any;
+  customMonth?: any;
+  currentShift?: any;
+  mobileView: boolean;
+  showCustomRanges: boolean;
+  hideRelativeRanges: boolean;
+  hideOtherRelativeRanges: boolean;
   history?: TimeRange[];
 }
 
@@ -143,7 +159,20 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
   const theme = useTheme();
   const styles = getStyles(theme);
   const historyOptions = mapToHistoryOptions(props.history, props.timeZone);
-  const { quickOptions = [], otherOptions = [], isFullscreen } = props;
+  const {
+    quickOptions = [],
+    otherOptions = [],
+    customOptions = [],
+    customDay,
+    customWeek,
+    customMonth,
+    isFullscreen,
+    mobileView,
+    showCustomRanges,
+    hideRelativeRanges,
+    hideOtherRelativeRanges,
+    currentShift,
+  } = props;
 
   return (
     <div className={styles.container}>
@@ -151,22 +180,72 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
         <FullScreenForm {...props} visible={isFullscreen} historyOptions={historyOptions} />
       </div>
       <CustomScrollbar className={styles.rightSide}>
-        <NarrowScreenForm {...props} visible={!isFullscreen} historyOptions={historyOptions} />
-        <TimeRangeList
-          title="Relative time ranges"
-          options={quickOptions}
-          onSelect={props.onChange}
-          value={props.value}
-          timeZone={props.timeZone}
-        />
-        <div className={styles.spacing} />
-        <TimeRangeList
-          title="Other quick ranges"
-          options={otherOptions}
-          onSelect={props.onChange}
-          value={props.value}
-          timeZone={props.timeZone}
-        />
+        {!mobileView && <NarrowScreenForm {...props} visible={!isFullscreen} historyOptions={historyOptions} />}
+        {showCustomRanges && (
+          <CustomTimeRangeList
+            title="Custom time ranges"
+            options={currentShift}
+            onSelect={props.onCurrentShiftSelected}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {showCustomRanges && (
+          <CustomTimeRangeList
+            title=""
+            options={customOptions}
+            onSelect={props.onCustomChange}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {showCustomRanges && (
+          <CustomTimeRangeList
+            title=""
+            options={customDay}
+            onSelect={props.onCustomDaySelected}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {showCustomRanges && (
+          <CustomTimeRangeList
+            title=""
+            options={customWeek}
+            onSelect={props.onCustomWeekSelected}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {showCustomRanges && (
+          <CustomTimeRangeList
+            title=""
+            options={customMonth}
+            onSelect={props.onCustomMonthSelected}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {!hideRelativeRanges && (
+          <TimeRangeList
+            title="Relative time ranges"
+            options={quickOptions}
+            onSelect={props.onRelativeChange}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {!hideOtherRelativeRanges && <div className={styles.spacing} />}
+        {!hideOtherRelativeRanges && (
+          <TimeRangeList
+            title="Other quick ranges"
+            options={otherOptions}
+            onSelect={props.onChange}
+            value={props.value}
+            timeZone={props.timeZone}
+          />
+        )}
+        {mobileView && <NarrowScreenForm {...props} visible={!isFullscreen} historyOptions={historyOptions} />}
       </CustomScrollbar>
     </div>
   );

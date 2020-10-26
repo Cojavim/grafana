@@ -99,6 +99,7 @@ export const hideDashSearch = eventFactory('hide-dash-search');
 export const hideDashEditor = eventFactory('hide-dash-editor');
 export const dashScroll = eventFactory<DashScrollPayload>('dash-scroll');
 export const dashLinksUpdated = eventFactory('dash-links-updated');
+export const customRangessUpdated = eventFactory('custom-ranges-updated');
 export const saveDashboard = eventFactory<SaveDashboardPayload>('save-dashboard');
 export const dashboardFetchStart = eventFactory('dashboard-fetch-start');
 export const dashboardSaved = eventFactory<DashboardModel>('dashboard-saved');
