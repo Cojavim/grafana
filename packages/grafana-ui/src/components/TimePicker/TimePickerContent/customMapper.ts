@@ -45,7 +45,7 @@ export const mapOptionToTimeRange = (option: any, timeZone?: TimeZone, index?: n
   return {
     name: name,
     from: stringToDateTime(option.absoluteFrom, false, timeZone),
-    to: stringToDateTime(option.absoluteTo, true, timeZone),
+    to: stringToDateTime(option.absoluteTo, false, timeZone),
     index: index,
     newDay: option.newDay,
     dayShift: aDayShift,
@@ -83,7 +83,7 @@ export const mapMovedToTimeRange = (option: any, timeZone?: TimeZone, index?: nu
   return {
     name: name,
     from: stringToDateTime(option.absoluteFrom, false, timeZone),
-    to: stringToDateTime(option.absoluteTo, true, timeZone),
+    to: stringToDateTime(option.absoluteTo, false, timeZone),
     index: index,
     newDay: option.newDay,
     dayShift: aDayShift,
@@ -104,7 +104,7 @@ export const mapCurrentShiftInit = (option: any, timeZone?: TimeZone, index?: nu
   return {
     name: name,
     from: stringToDateTime(option.absoluteFrom, false, timeZone),
-    to: stringToDateTime(option.absoluteTo, true, timeZone),
+    to: stringToDateTime(option.absoluteTo, false, timeZone),
     index: index,
     newDay: option.newDay,
     dayShift: aDayShift,
@@ -119,7 +119,7 @@ export const mapCurrentShiftInit = (option: any, timeZone?: TimeZone, index?: nu
 export const mapRelativeOptionToTimeRange = (option: TimeOption, timeZone?: TimeZone): TimeRange => {
   return {
     from: stringToDateTime(option.from, false, timeZone),
-    to: stringToDateTime(option.to, true, timeZone),
+    to: stringToDateTime(option.to, false, timeZone),
     raw: {
       from: option.from,
       to: option.to,
