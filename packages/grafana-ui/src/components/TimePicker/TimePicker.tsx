@@ -293,14 +293,18 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
                 index: i,
               };
 
-              let lmapped = mapOptionToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift);
+              let todayDate = moment().format('YYYY-MM-DD') + ' ' + dashToTimeLocal;
+              let lastPosibleToDateTime = moment(todayDate).local();
+              customDayShift = lastPosibleToDateTime.diff(dashTo, 'days') * -1;
+
+              let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift);
               this.disableCustomStates();
               this.setState({ canMoveForward: lmapped.canMoveForward });
               this.setState({ isCustom: true });
 
-              let todayDate = moment().format('YYYY-MM-DD') + ' ' + dashToTimeLocal;
-              let lastPosibleToDateTime = moment(todayDate).local();
-              customDayShift = lastPosibleToDateTime.diff(dashTo, 'days') * -1;
+              // let todayDate = moment().format('YYYY-MM-DD') + ' ' + dashToTimeLocal;
+              // let lastPosibleToDateTime = moment(todayDate).local();
+              // customDayShift = lastPosibleToDateTime.diff(dashTo, 'days') * -1;
 
               this.onCustomMove(lmapped);
 
@@ -357,10 +361,14 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     this.onCustomMove(lmapped);
     this.disableCustomStates();
     this.setState({ isWeek: true });
-    this.setState({ canMoveForward: lmapped.canMoveForward });
-    let now = moment();
-    customDayShift = now.diff(aDashTo, 'weeks') * -1;
-    this.setRangeName(customWeek[0].name, customDayShift);
+    if (aDateTo === 'now') {
+      this.setState({ canMoveForward: false });
+      this.setState({ rangeName: 'Current Week' });
+    } else {
+      let now = moment();
+      customDayShift = now.diff(aDashTo, 'weeks') * -1;
+      this.setRangeName(customWeek[0].name, customDayShift);
+    }
   }
   setFoundDay(aDateFrom: any, aDateTo: any, aDashTo: any) {
     // let dateFrom = dashFrom.local().format('YYYY-MM-DD HH:mm');
@@ -402,7 +410,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     let dayShiftForName = lastPosibleToDateTime.diff(dashTo, 'days');
     //let dayShiftForName = hourShiftForName / 24;
     if (dayShiftForName === 0) {
-      aName = 'Last ' + aName;
+      if (aName !== 'Current Shift') {
+        aName = 'Last ' + aName;
+      }
     } else {
       aName = aName + ' - ' + dayShiftForName;
     }
