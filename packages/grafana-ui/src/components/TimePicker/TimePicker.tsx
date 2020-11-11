@@ -73,7 +73,7 @@ let customDay: any[] = [];
 let customWeek: any[] = [];
 let customMonth: any[] = [];
 let currentShiftOption: any[] = [];
-let shiftNameHelper: any[] = [];
+// let shiftNameHelper: any[] = [];
 // let labelHistory: any[] = [];
 // let dirHelper: number;
 // let newDayInit: boolean;
@@ -397,6 +397,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
   }
 
   setCustomRangeName(aName: string | undefined) {
+    if (aName.substring(0, 5) === 'Last ') {
+      aName = aName.slice(5);
+    }
     let dashToTimeLocal = this.props.dashboard.time.to.local().format('HH:mm');
     let todayDate = moment().format('YYYY-MM-DD') + ' ' + dashToTimeLocal;
     let lastPosibleToDateTime = moment(todayDate).local();
@@ -444,7 +447,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     customWeek.length = 0;
     customMonth.length = 0;
     currentShiftOption.length = 0;
-    shiftNameHelper.length = 0;
+    // shiftNameHelper.length = 0;
     //dirHelper = 0;
     let MonthStartTime = '';
     if (this.props.dashboard.ranges !== undefined && this.props.dashboard.ranges.length !== 0) {
@@ -453,7 +456,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
         if (MonthStartTime === '' || MonthStartTime > this.props.dashboard.ranges[i].from) {
           MonthStartTime = this.props.dashboard.ranges[i].from;
         }
-        shiftNameHelper.push('');
+        // shiftNameHelper.push('');
       }
       let currentShiftDefinition = {
         name: 'Current Shift',
@@ -500,18 +503,19 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     customIndex = timeRange.index;
     customDayShift = timeRange.dayShift;
     this.setDayShift(timeRange);
-    if (timeRange.name === 'Current Shift') {
-      this.setState({ rangeName: timeRange.name });
-    } else {
-      this.setState({ rangeName: 'Last ' + timeRange.name });
-    }
+    this.setCustomRangeName(timeRange.name);
+    // if (timeRange.name === 'Current Shift') {
+    //   this.setState({ rangeName: timeRange.name });
+    // } else {
+    //   this.setState({ rangeName: 'Last ' + timeRange.name });
+    // }
     this.disableCustomStates();
     this.setState({ isCustom: true });
     this.setState({ canMoveForward: timeRange.canMoveForward });
     //this.setCustomRangeName(timeRange.name);
-    for (let i = 0; i < shiftNameHelper.length; ++i) {
-      shiftNameHelper[i] = '';
-    }
+    // for (let i = 0; i < shiftNameHelper.length; ++i) {
+    //   shiftNameHelper[i] = '';
+    // }
     //dirHelper = 0;
     if (timeRange.newDay) {
       customDayShift++;

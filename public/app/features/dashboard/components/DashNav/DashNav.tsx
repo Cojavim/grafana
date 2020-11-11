@@ -19,6 +19,8 @@ import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
 import { sanitizeUrl } from 'app/core/utils/text';
 
+import { AngularDashboardLinks } from '../SubMenu/AngularDashboardLinks';
+
 export interface OwnProps {
   dashboard: DashboardModel;
   editview: string;
@@ -266,6 +268,7 @@ export class DashNav extends PureComponent<Props> {
 
         {!dashboard.timepicker.hidden && (
           <div className="navbar-buttons">
+            <AngularDashboardLinks dashboard={this.props.dashboard} />
             <DashNavTimeControls dashboard={dashboard} location={location} updateLocation={updateLocation} />
           </div>
         )}
