@@ -268,7 +268,7 @@ export class DashNav extends PureComponent<Props> {
 
         {!dashboard.timepicker.hidden && (
           <div className="navbar-buttons">
-            <AngularDashboardLinks dashboard={this.props.dashboard} />
+            {dashboard.showDashLinksInDashNav && <AngularDashboardLinks dashboard={this.props.dashboard} />}
             <DashNavTimeControls dashboard={dashboard} location={location} updateLocation={updateLocation} />
           </div>
         )}

@@ -64,6 +64,7 @@ export class DashboardModel {
   mobileView: boolean;
   absoluteBefore: boolean;
   absoluteAfter: boolean;
+  showDashLinksInDashNav: boolean;
 
   // ------------------
   // not persisted
@@ -123,6 +124,7 @@ export class DashboardModel {
     this.mobileView = data.mobileView || false;
     this.absoluteBefore = this.defaultTrue(data.absoluteBefore);
     this.absoluteAfter = data.absoluteAfter || false;
+    this.showDashLinksInDashNav = data.showDashLinksInDashNav || false;
     this.gnetId = data.gnetId || null;
     this.panels = _.map(data.panels || [], (panelData: any) => new PanelModel(panelData));
 
