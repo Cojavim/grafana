@@ -148,7 +148,16 @@ export class DashNav extends PureComponent<Props> {
       </div>
     );
   }
-
+  renderCustomLinks() {
+    return (
+      <>
+        <div className="navbar-buttons">
+          <AngularDashboardLinks dashboard={this.props.dashboard} />
+        </div>
+        <div className="navbar__spacer" />
+      </>
+    );
+  }
   render() {
     const { dashboard, onAddPanel, location } = this.props;
     const { canStar, canSave, canShare, showSettings, isStarred } = dashboard.meta;
@@ -159,6 +168,16 @@ export class DashNav extends PureComponent<Props> {
       <div className="navbar">
         {this.isInFullscreenOrSettings && this.renderBackButton()}
         {this.renderDashboardTitleSearchButton()}
+        {dashboard.showDashLinksInDashNav && this.renderCustomLinks()}
+        {!dashboard.showDashLinksInDashNav && <div className="navbar__spacer_wide" />}
+        {!dashboard.timepicker.hidden && (
+          <>
+            <div className="navbar-buttons">
+              <DashNavTimeControls dashboard={dashboard} location={location} updateLocation={updateLocation} />
+            </div>
+            <div className="navbar__spacer_wide" />
+          </>
+        )}
 
         {this.playlistSrv.isPlaying && (
           <div className="navbar-buttons navbar-buttons--playlist">
@@ -182,7 +201,6 @@ export class DashNav extends PureComponent<Props> {
             />
           </div>
         )}
-
         <div className="navbar-buttons navbar-buttons--actions">
           {canSave && (
             <DashNavButton
@@ -265,13 +283,6 @@ export class DashNav extends PureComponent<Props> {
             onClick={this.onToggleTVMode}
           />
         </div>
-
-        {!dashboard.timepicker.hidden && (
-          <div className="navbar-buttons">
-            {dashboard.showDashLinksInDashNav && <AngularDashboardLinks dashboard={this.props.dashboard} />}
-            <DashNavTimeControls dashboard={dashboard} location={location} updateLocation={updateLocation} />
-          </div>
-        )}
       </div>
     );
   }

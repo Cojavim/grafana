@@ -125,7 +125,10 @@ i.navbar-page-btn__search {
 }
 
 .navbar__spacer {
-  flex-grow: 1;
+  flex-grow: 0.25;
+}
+.navbar__spacer_wide {
+  flex-grow: 0.5;
 }
 
 .navbar-button {
