@@ -144,6 +144,7 @@ interface Props {
   hideRelativeRanges: boolean;
   hideOtherRelativeRanges: boolean;
   history?: TimeRange[];
+  firstPosibleDate?: Date;
 }
 
 interface PropsWithScreenSize extends Props {
@@ -172,6 +173,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
     hideRelativeRanges,
     hideOtherRelativeRanges,
     currentShift,
+    firstPosibleDate,
   } = props;
 
   return (
@@ -188,6 +190,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
             onSelect={props.onCurrentShiftSelected}
             value={props.value}
             timeZone={props.timeZone}
+            firstPosibleDate={firstPosibleDate}
           />
         )}
         {showCustomRanges && (
@@ -197,6 +200,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
             onSelect={props.onCustomChange}
             value={props.value}
             timeZone={props.timeZone}
+            firstPosibleDate={props.firstPosibleDate}
           />
         )}
         {showCustomRanges && (
@@ -206,6 +210,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
             onSelect={props.onCustomDaySelected}
             value={props.value}
             timeZone={props.timeZone}
+            firstPosibleDate={props.firstPosibleDate}
           />
         )}
         {showCustomRanges && (
@@ -215,6 +220,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
             onSelect={props.onCustomWeekSelected}
             value={props.value}
             timeZone={props.timeZone}
+            firstPosibleDate={props.firstPosibleDate}
           />
         )}
         {showCustomRanges && (
@@ -224,6 +230,7 @@ export const TimePickerContentWithScreenSize: React.FC<PropsWithScreenSize> = pr
             onSelect={props.onCustomMonthSelected}
             value={props.value}
             timeZone={props.timeZone}
+            firstPosibleDate={props.firstPosibleDate}
           />
         )}
         {!hideRelativeRanges && (

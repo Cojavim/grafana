@@ -16,6 +16,7 @@ export interface TimeRange {
   newDay?: boolean;
   dayShift?: number;
   canMoveForward?: boolean;
+  canMoveBackward?: boolean;
 }
 
 export interface AbsoluteTimeRange {

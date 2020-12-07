@@ -10,12 +10,19 @@ import {
   TIME_FORMAT,
 } from '@grafana/data';
 
-import { customTimeRangePicked } from '../range_ctrl';
+import { customTimeRangePicked, formatDate } from '../range_ctrl';
 
 import { stringToDateTimeType } from '../time';
 
-export const mapOptionToTimeRange = (option: any, timeZone?: TimeZone, index?: number, aDayShift = 0): TimeRange => {
+export const mapOptionToTimeRange = (
+  option: any,
+  timeZone?: TimeZone,
+  index?: number,
+  aDayShift = 0,
+  aFirstPosibleDate?: Date
+): TimeRange => {
   let canMoveForward = true;
+  let canMoveBackward = true;
   let name = '';
   if (option.type === 'currentShift') {
     const result = customTimeRangePicked(option.type, option, aDayShift, null);
@@ -39,6 +46,14 @@ export const mapOptionToTimeRange = (option: any, timeZone?: TimeZone, index?: n
   //   option.absoluteTo = 'now';
   //   canMoveForward = false;
   // }
+  if (aFirstPosibleDate !== undefined) {
+    if (new Date(option.absoluteFrom) < aFirstPosibleDate) {
+      const lFistPosibleDate = formatDate(aFirstPosibleDate);
+      option.absoluteFrom = lFistPosibleDate;
+      canMoveBackward = false;
+    }
+  }
+
   if (option.newDay === undefined) {
     option.newDay = false;
   }
@@ -50,6 +65,7 @@ export const mapOptionToTimeRange = (option: any, timeZone?: TimeZone, index?: n
     newDay: option.newDay,
     dayShift: aDayShift,
     canMoveForward: canMoveForward,
+    canMoveBackward: canMoveBackward,
     raw: {
       from: option.from,
       to: option.to,
@@ -57,8 +73,15 @@ export const mapOptionToTimeRange = (option: any, timeZone?: TimeZone, index?: n
   };
 };
 
-export const mapMovedToTimeRange = (option: any, timeZone?: TimeZone, index?: number, aDayShift = 0): TimeRange => {
+export const mapMovedToTimeRange = (
+  option: any,
+  timeZone?: TimeZone,
+  index?: number,
+  aDayShift = 0,
+  aFirstPosibleDate = new Date()
+): TimeRange => {
   let canMoveForward = true;
+  let canMoveBackward = true;
   let name = '';
 
   name = option.name;
@@ -77,6 +100,12 @@ export const mapMovedToTimeRange = (option: any, timeZone?: TimeZone, index?: nu
     }
   }
 
+  if (new Date(option.absoluteFrom) < aFirstPosibleDate) {
+    const lFistPosibleDate = formatDate(aFirstPosibleDate);
+    option.absoluteFrom = lFistPosibleDate;
+    canMoveBackward = false;
+  }
+
   if (option.newDay === undefined) {
     option.newDay = false;
   }
@@ -88,6 +117,7 @@ export const mapMovedToTimeRange = (option: any, timeZone?: TimeZone, index?: nu
     newDay: option.newDay,
     dayShift: aDayShift,
     canMoveForward: canMoveForward,
+    canMoveBackward: canMoveBackward,
     raw: {
       from: option.from,
       to: option.to,

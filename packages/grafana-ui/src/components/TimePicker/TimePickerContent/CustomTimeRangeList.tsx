@@ -34,6 +34,7 @@ interface Props {
   onSelect: (option: TimeRange) => void;
   placeholderEmpty?: ReactNode;
   timeZone?: TimeZone;
+  firstPosibleDate?: Date;
 }
 
 export const CustomTimeRangeList: React.FC<Props> = props => {
@@ -58,7 +59,7 @@ export const CustomTimeRangeList: React.FC<Props> = props => {
   );
 };
 
-const Options: React.FC<Props> = ({ options, value, onSelect, timeZone }) => {
+const Options: React.FC<Props> = ({ options, value, onSelect, timeZone, firstPosibleDate }) => {
   const styles = getOptionsStyles();
 
   return (
@@ -69,7 +70,7 @@ const Options: React.FC<Props> = ({ options, value, onSelect, timeZone }) => {
             key={keyForOption(option, index)}
             value={option}
             selected={isEqual(option, value)}
-            onSelect={option => onSelect(mapOptionToTimeRange(option, timeZone, index))}
+            onSelect={option => onSelect(mapOptionToTimeRange(option, timeZone, index, 0, firstPosibleDate))}
           />
         ))}
       </div>

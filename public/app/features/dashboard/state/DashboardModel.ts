@@ -10,7 +10,17 @@ import sortByKeys from 'app/core/utils/sort_by_keys';
 // Types
 import { GridPos, panelAdded, PanelModel, panelRemoved } from './PanelModel';
 import { DashboardMigrator } from './DashboardMigrator';
-import { AppEvent, dateTime, DateTimeInput, isDateTime, PanelEvents, TimeRange, TimeZone, toUtc } from '@grafana/data';
+import {
+  AppEvent,
+  //DateTime,
+  dateTime,
+  DateTimeInput,
+  isDateTime,
+  PanelEvents,
+  TimeRange,
+  TimeZone,
+  toUtc,
+} from '@grafana/data';
 import { UrlQueryValue } from '@grafana/runtime';
 import { CoreEvents, DashboardMeta, KIOSK_MODE_TV } from 'app/types';
 import { VariableModel } from '../../templating/variable';
@@ -65,6 +75,7 @@ export class DashboardModel {
   absoluteBefore: boolean;
   absoluteAfter: boolean;
   showDashLinksInDashNav: boolean;
+  firsPosibleDate: any;
 
   // ------------------
   // not persisted
@@ -127,6 +138,7 @@ export class DashboardModel {
     this.showDashLinksInDashNav = data.showDashLinksInDashNav || false;
     this.gnetId = data.gnetId || null;
     this.panels = _.map(data.panels || [], (panelData: any) => new PanelModel(panelData));
+    this.firsPosibleDate = data.firsPosibleDate || '1999-01-01';
 
     this.resetOriginalVariables(true);
     this.resetOriginalTime();

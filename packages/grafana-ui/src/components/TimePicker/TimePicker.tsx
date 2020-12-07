@@ -82,6 +82,7 @@ let customDayShift: number;
 let relativeStep: number;
 let relativeValue: any;
 let previousRelativeRange: any;
+let firstPossibleDate: Date;
 
 const getStyles = stylesFactory((theme: GrafanaTheme) => {
   return {
@@ -153,6 +154,7 @@ export interface State {
   isWeek: boolean;
   isMonth: boolean;
   canMoveForward: boolean;
+  canMoveBackward: boolean;
   rangeName: string;
 }
 
@@ -165,10 +167,12 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     isWeek: false,
     isMonth: false,
     canMoveForward: true,
+    canMoveBackward: true,
     rangeName: '',
   };
 
   componentDidMount() {
+    this.setFirstPosibleDate();
     this.populateCustomOptions();
     if (this.shiftFound()) {
     } else if (this.props.dashboard.customReloadCurrent) {
@@ -187,6 +191,30 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     // }
   }
 
+  setFirstPosibleDate() {
+    firstPossibleDate = this.isValidDate(this.props.dashboard.firsPosibleDate);
+  }
+
+  isValidDate(aDateString: string) {
+    var regEx = /^\d{4}-\d{2}-\d{2}$/;
+    if (!aDateString.match(regEx)) {
+      console.log(aDateString, 'Is not valid Date! Valid Format is YYYY-MM-DD');
+      return new Date(1, 1, 1); // Invalid format
+    }
+    var d = new Date(aDateString);
+    var dNum = d.getTime();
+    if (!dNum && dNum !== 0) {
+      console.log(aDateString, 'Is not valid Date! Valid Format is YYYY-MM-DD');
+      return new Date(1, 1, 1);
+    } // NaN value, Invalid date
+    if (d.toISOString().slice(0, 10) === aDateString) {
+      return d;
+    } else {
+      console.log(aDateString, 'Is not valid Date! Valid Format is YYYY-MM-DD');
+      return new Date(1, 1, 1);
+    }
+  }
+
   shiftFound() {
     if (!moment.isMoment(this.props.dashboard.time.from) || !moment.isMoment(this.props.dashboard.time.to)) {
       return false;
@@ -198,7 +226,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     let dateFrom = dashFrom.local().format('YYYY-MM-DD HH:mm');
     let dateTo = dashTo.local().format('YYYY-MM-DD HH:mm');
     let dashFromTimeLocal = dashFrom.local().format('HH:mm');
+    let dashToTimeLocal = dashTo.local().format('HH:mm');
     let dashHourDiff = dashTo.diff(dashFrom, 'hours');
+    let firstPosibleDate = this.props.dashboard.firsPosibleDate + ' 00:00';
     //let dathToMilli = dashToTO.millisecond();
     if (moment.isMoment(this.props.dashboard.time.from) && dathToMilli) {
       if (dashHourDiff > 168) {
@@ -236,6 +266,68 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
         }
       }
       // check Current Day
+    } else if (firstPosibleDate === dateFrom) {
+      if (dashHourDiff > 168) {
+        let dashToDayLocal = dashTo.local().format('DD');
+        if (dashToDayLocal === '01' && customMonth[0].from === dashToTimeLocal) {
+          //It is most probably a month
+          this.setFoundMonth(firstPosibleDate, dateTo, dashTo);
+          return true;
+        }
+      }
+      if (dashHourDiff > 24) {
+        // Not a day
+        let weekToIsoDay = getDayNumber(customWeek[0].endDay);
+        let dashToIsoDay = dashTo.isoWeekday();
+        if (customWeek[0].to === dashToTimeLocal && dashToIsoDay === weekToIsoDay) {
+          // Most liklely a week
+          this.setFoundWeek(firstPosibleDate, dateTo, dashTo);
+          return true;
+        }
+      }
+      for (let i = 0; i < customOptions.length; i++) {
+        //let dashTo = time.to;
+        if (customOptions[i].to === dashToTimeLocal) {
+          // find out if to date is possible, if not it is this shift
+          //let dashToTimeLocal = dashTo.local().format('HH:mm');
+          let shiftFrom = dateFrom.substring(0, 10) + ' ' + customOptions[i].from;
+          let shiftFromMoment = moment(shiftFrom).local();
+          if (customOptions[i].newDay) {
+            shiftFromMoment = shiftFromMoment.subtract(1, 'days');
+          }
+          let firstPosibleMoment = moment(firstPosibleDate).local();
+          //let posibleToDate = shiftFromMoment.toDate();
+
+          if (firstPosibleMoment > shiftFromMoment) {
+            // IT IS THIS DAY!!!
+            this.setFoundDay(firstPosibleDate, dateTo, dashTo);
+            return true;
+          } else {
+            let todayDate = moment().format('YYYY-MM-DD') + ' ' + dashToTimeLocal;
+            let lastPosibleToDateTime = moment(todayDate).local();
+            customDayShift = lastPosibleToDateTime.diff(dashTo, 'days') * -1;
+
+            let lmapped = mapMovedToTimeRange(
+              customOptions[i],
+              this.props.timeZone,
+              0,
+              customDayShift,
+              firstPossibleDate
+            );
+            this.disableCustomStates();
+            this.setState({ canMoveForward: lmapped.canMoveForward });
+            this.setState({ canMoveBackward: lmapped.canMoveBackward });
+            this.setState({ isCustom: true });
+
+            this.onCustomMove(lmapped);
+
+            lmapped.name = this.setCustomRangeName(lmapped.name);
+
+            customIndex = i;
+            return true;
+          }
+        }
+      }
     } else {
       let dashToTimeLocal = dashTo.local().format('HH:mm');
 
@@ -297,9 +389,10 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
               let lastPosibleToDateTime = moment(todayDate).local();
               customDayShift = lastPosibleToDateTime.diff(dashTo, 'days') * -1;
 
-              let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift);
+              let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift, firstPossibleDate);
               this.disableCustomStates();
               this.setState({ canMoveForward: lmapped.canMoveForward });
+              this.setState({ canMoveBackward: lmapped.canMoveBackward });
               this.setState({ isCustom: true });
 
               // let todayDate = moment().format('YYYY-MM-DD') + ' ' + dashToTimeLocal;
@@ -331,9 +424,10 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
       name: customMonth[0].name,
       type: customMonth[0].type,
     };
-    let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift);
+    let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift, firstPossibleDate);
     this.onCustomMove(lmapped);
     this.disableCustomStates();
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.setState({ isMonth: true });
     if (aDateTo === 'now') {
       this.setState({ canMoveForward: false });
@@ -357,9 +451,10 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
       startDay: customWeek[0].startDay,
       endDay: customWeek[0].endDay,
     };
-    let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift);
+    let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift, firstPossibleDate);
     this.onCustomMove(lmapped);
     this.disableCustomStates();
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.setState({ isWeek: true });
     if (aDateTo === 'now') {
       this.setState({ canMoveForward: false });
@@ -382,9 +477,10 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
       type: customDay[0].type,
       newDay: customDay[0].newDay,
     };
-    let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift);
+    let lmapped = mapMovedToTimeRange(rangeFound, this.props.timeZone, 0, customDayShift, firstPossibleDate);
     this.onCustomMove(lmapped);
     this.disableCustomStates();
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.setState({ isDay: true });
     if (aDateTo === 'now') {
       this.setState({ canMoveForward: false });
@@ -487,6 +583,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     this.setState({ isWeek: false });
     this.setState({ isMonth: false });
     this.setState({ canMoveForward: true });
+    this.setState({ canMoveBackward: true });
     this.setState({ isRelative: false });
   }
 
@@ -567,6 +664,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     this.props.onChange(timeRange);
     this.setState({ rangeName: timeRange.name });
     this.disableCustomStates();
+    this.setState({ canMoveBackward: timeRange.canMoveBackward });
     this.setState({ isDay: true });
     this.removeChanges();
   };
@@ -576,6 +674,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     this.props.onChange(timeRange);
     this.setState({ rangeName: timeRange.name });
     this.disableCustomStates();
+    this.setState({ canMoveBackward: timeRange.canMoveBackward });
     this.setState({ isWeek: true });
     this.removeChanges();
   };
@@ -584,8 +683,12 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     this.props.onChange(timeRange);
     this.setState({ rangeName: timeRange.name });
     this.disableCustomStates();
+    this.setState({ canMoveBackward: timeRange.canMoveBackward });
     this.setState({ isMonth: true });
     this.removeChanges();
+    if (timeRange.to < timeRange.from) {
+      this.onMoveMonth(1);
+    }
   };
 
   onRelativeChange = (timeRange: TimeRange) => {
@@ -619,8 +722,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     let lResult = customMove(-1, customIndex, customOptions, customDayShift);
     customDayShift = lResult.dayShift;
     let lRange = customOptions[lResult.index];
-    let lmapped = mapMovedToTimeRange(lRange, this.props.timeZone, lResult.index, customDayShift);
+    let lmapped = mapMovedToTimeRange(lRange, this.props.timeZone, lResult.index, customDayShift, firstPossibleDate);
     this.setState({ canMoveForward: lmapped.canMoveForward });
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.onCustomMove(lmapped);
     this.setCustomRangeName(lmapped.name);
   };
@@ -638,8 +742,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
       customDayShift = 0;
     }
     let lRange = customOptions[lResult.index];
-    let lmapped = mapMovedToTimeRange(lRange, this.props.timeZone, lResult.index, customDayShift);
+    let lmapped = mapMovedToTimeRange(lRange, this.props.timeZone, lResult.index, customDayShift, firstPossibleDate);
     this.setState({ canMoveForward: lmapped.canMoveForward });
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.onCustomMove(lmapped);
     this.setCustomRangeName(lmapped.name);
   };
@@ -711,8 +816,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
   onMoveDay(aDirection: number) {
     customDayShift += aDirection;
     this.checkDayShiftLimit();
-    let lmapped = mapMovedToTimeRange(customDay[0], this.props.timeZone, 0, customDayShift);
+    let lmapped = mapMovedToTimeRange(customDay[0], this.props.timeZone, 0, customDayShift, firstPossibleDate);
     this.setState({ canMoveForward: lmapped.canMoveForward });
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.onCustomMove(lmapped);
     this.setRangeName(lmapped.name, customDayShift);
   }
@@ -726,8 +832,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
   onMoveWeek(aDirection: number) {
     customDayShift += aDirection;
     this.checkDayShiftLimit();
-    let lmapped = mapMovedToTimeRange(customWeek[0], this.props.timeZone, 0, customDayShift);
+    let lmapped = mapMovedToTimeRange(customWeek[0], this.props.timeZone, 0, customDayShift, firstPossibleDate);
     this.setState({ canMoveForward: lmapped.canMoveForward });
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.onCustomMove(lmapped);
     this.setRangeName(lmapped.name, customDayShift);
   }
@@ -741,8 +848,9 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
   onMoveMonth(aDirection: number) {
     customDayShift += aDirection;
     this.checkDayShiftLimit();
-    let lmapped = mapMovedToTimeRange(customMonth[0], this.props.timeZone, 0, customDayShift);
+    let lmapped = mapMovedToTimeRange(customMonth[0], this.props.timeZone, 0, customDayShift, firstPossibleDate);
     this.setState({ canMoveForward: lmapped.canMoveForward });
+    this.setState({ canMoveBackward: lmapped.canMoveBackward });
     this.onCustomMove(lmapped);
     this.setRangeName(lmapped.name, customDayShift);
   }
@@ -850,7 +958,17 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
       history,
     } = this.props;
 
-    const { isOpen, isRelative, isCustom, isDay, isWeek, rangeName, isMonth, canMoveForward } = this.state;
+    const {
+      isOpen,
+      isRelative,
+      isCustom,
+      isDay,
+      isWeek,
+      rangeName,
+      isMonth,
+      canMoveForward,
+      canMoveBackward,
+    } = this.state;
     const styles = getStyles(theme);
     const hasAbsolute = isDateTime(value.raw.from) || isDateTime(value.raw.to);
     const syncedTimePicker = timeSyncButton && isSynced;
@@ -863,7 +981,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
     return (
       <div className={styles.container}>
         <div className={styles.buttons}>
-          {isCustom && (
+          {isCustom && canMoveBackward && (
             <button
               className="btn navbar-button navbar-button--tight"
               // style={{ color: 'red' }}
@@ -872,7 +990,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
               <i className="fa fa-chevron-left" />
             </button>
           )}
-          {isRelative && (
+          {isRelative && canMoveBackward && (
             <button
               className="btn navbar-button navbar-button--tight"
               // style={{ color: 'yellow' }}
@@ -881,7 +999,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
               <i className="fa fa-chevron-left" />
             </button>
           )}
-          {isDay && (
+          {isDay && canMoveBackward && (
             <button
               className="btn navbar-button navbar-button--tight"
               // style={{ color: 'green' }}
@@ -890,7 +1008,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
               <i className="fa fa-chevron-left" />
             </button>
           )}
-          {isWeek && (
+          {isWeek && canMoveBackward && (
             <button
               className="btn navbar-button navbar-button--tight"
               // style={{ color: 'red' }}
@@ -899,7 +1017,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
               <i className="fa fa-chevron-left" />
             </button>
           )}
-          {isMonth && (
+          {isMonth && canMoveBackward && (
             <button
               className="btn navbar-button navbar-button--tight"
               // style={{ color: 'yellow' }}
@@ -949,6 +1067,7 @@ export class UnthemedTimePicker extends PureComponent<Props, State> {
                   hideRelativeRanges={this.props.dashboard.hideRelativeRanges}
                   hideOtherRelativeRanges={this.props.dashboard.hideOtherRelativeRanges}
                   mobileView={this.props.dashboard.mobileView}
+                  firstPosibleDate={firstPossibleDate}
                 />
               </ClickOutsideWrapper>
             )}

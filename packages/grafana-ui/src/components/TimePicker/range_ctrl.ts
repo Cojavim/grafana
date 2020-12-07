@@ -507,3 +507,19 @@ export function getDayNumber(aDay: any) {
       throw new Error('Invalid Day');
   }
 }
+
+export function formatDate(aDate: Date) {
+  var d = new Date(aDate),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) {
+    month = '0' + month;
+  }
+  if (day.length < 2) {
+    day = '0' + day;
+  }
+
+  return [year, month, day].join('-');
+}

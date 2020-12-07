@@ -33,7 +33,7 @@ function dashLink($compile: any, $sanitize: any, linkSrv: LinkSrv) {
       const dashboard = scope.dashboard;
 
       let template =
-        '<div class="gf-form gf-form-border">' +
+        '<div class="gf-form">' +
         '<a class="pointer gf-form-label gf-form-label-bigger" data-placement="bottom"' +
         (link.asDropdown ? ' ng-click="fillDropdown(link)" data-toggle="dropdown"' : '') +
         '>' +
